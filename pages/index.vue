@@ -2,7 +2,7 @@
   <div class="wrapper h-screen flex flex-col">
     <header>
       <div class="container mx-auto">
-        <h1 class="text-center text-lg text-white py-8">Gere as thumbnails para cursos do IPGU facilmente</h1>
+        <h1 class="text-center text-white py-8 text-5xl" style="font-family: MoolBoran, sans-serif;">Gere as thumbnails para cursos do IPGU facilmente</h1>
       </div>
     </header>
     <main class="flex-1">
@@ -118,7 +118,7 @@ export default {
       }else{
         scale = x / 660;
         sy = (y - this.canvas.height * scale) / 2;
-        y = this.canvas.height * scale;          
+        y = this.canvas.height * scale;
       }
       return {sx: sx, sy: sy, sWidth: x, sHeight: y};
     },
@@ -199,6 +199,14 @@ export default {
 </script>
 
 <style>
+  @font-face {
+      font-family: 'MoolBoran';
+      src:  url('../assets/fonts/MoolBoran.woff2') format('woff2'),
+            url('../assets/fonts/MoolBoran.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+  }
+
   body{
     @apply bg-blue-800;
   }
