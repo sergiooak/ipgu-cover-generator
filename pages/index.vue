@@ -1,12 +1,12 @@
 <template>
   <div class="wrapper h-screen flex flex-col">
     <header>
-      <div class="container mx-auto">
-        <h1 class="text-center text-white py-8 text-5xl" style="font-family: MoolBoran, sans-serif;">Gere as thumbnails para cursos do IPGU facilmente</h1>
+      <div class="container mx-auto px-4">
+        <h1 class="text-center text-white py-10 text-3xl leading-none md:text-5xl" style="font-family: MoolBoran, sans-serif;">Gere as thumbnails para cursos do IPGU facilmente</h1>
       </div>
     </header>
     <main class="flex-1">
-      <div class="container mx-auto">
+      <div class="container mx-auto px-4">
         <div class="bg-white rounded-lg p-4 shadow-lg flex flex-col md:flex-row-reverse">
           <form class="md:w-2/6 flex flex-col">
             <label class="block">
