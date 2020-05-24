@@ -102,16 +102,35 @@ export default {
       }else{
         return 50;
       }
-    }
+    },
   },
   methods:{
+    calcCrop(x,y){
+      console.log(`x:${x} y:${y}`);
+      let biggestSize = x >= y ? 'x' : 'y';
+      let sx = 0;
+      let sy = 0;
+      let scale = 0;
+      if (biggestSize == 'x') {
+        scale = y / this.canvas.height;
+        sx = (x - 660 * scale) / 2;
+        x = 660 * scale;
+      }else{
+        scale = x / 660;
+        sy = (y - this.canvas.height * scale) / 2;
+        y = this.canvas.height * scale;
+      }
+      return {sx: sx, sy: sy, sWidth: x, sHeight: y};
+    },
     reset(img) {
       let cx = this;
       let canvas = this.canvas;
       this.canvas.ctx.clearRect(0, 0, this.width, this.height);
       let i = new Image();
       i.onload = function(){
-        canvas.ctx.drawImage(i,0,0, 660, canvas.height);
+        let axis = cx.calcCrop(i.width, i.height);
+        console.log(axis);
+        canvas.ctx.drawImage(i, axis.sx, axis.sy, axis.sWidth, axis.sHeight, 0, 0, 660, canvas.height);
         cx.image = i;
         cx.applyBase();
       }
@@ -156,9 +175,6 @@ export default {
       let reader = new FileReader();
       reader.onload = function(event){
         let img = new Image();
-        img.onload = function(){
-          canvas.ctx.drawImage(img,0,0, canvas.width, canvas.height);
-        }
         cx.reset(event.target.result)
       }
       reader.readAsDataURL(e.target.files[0]);
