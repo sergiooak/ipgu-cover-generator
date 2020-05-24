@@ -107,7 +107,7 @@ export default {
   methods:{
     calcCrop(x,y){
       console.log(`x:${x} y:${y}`);
-      let biggestSize = x >= y ? 'x' : 'y';
+      let biggestSize = x > y ? 'x' : 'y';
       let sx = 0;
       let sy = 0;
       let scale = 0;
@@ -118,7 +118,7 @@ export default {
       }else{
         scale = x / 660;
         sy = (y - this.canvas.height * scale) / 2;
-        y = this.canvas.height * scale;
+        y = this.canvas.height * scale;          
       }
       return {sx: sx, sy: sy, sWidth: x, sHeight: y};
     },
