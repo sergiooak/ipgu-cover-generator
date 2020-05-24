@@ -11,15 +11,15 @@
           <form class="md:w-2/6 flex flex-col">
             <label class="block">
               <span class="text-gray-700">Número TSV:</span>
-              <input class="form-input mt-1 block w-full" v-model="form.tsv">
+              <input class="form-input mt-1 block w-full" v-model.lazy="form.tsv">
             </label>
             <label class="block">
               <span class="text-gray-700">Título:</span>
-              <textarea class="form-textarea mt-1 block w-full" rows="3" v-model="form.titulo"></textarea>
+              <textarea class="form-textarea mt-1 block w-full" rows="3" v-model.lazy="form.titulo"></textarea>
             </label>
             <label class="block">
               <span class="text-gray-700">Cidade:</span>
-              <input class="form-input mt-1 block w-full" v-model="form.cidade">
+              <input class="form-input mt-1 block w-full" v-model.lazy="form.cidade">
             </label>
             <label class="block relative flex-1 flex flex-col">
               <span class="text-gray-700">Imagem:</span>
@@ -45,9 +45,9 @@
           </div>
           <div class="flex flex-col md:flex-row items-center ">
             <span>Ou baixe o zip com</span>
-            <input type="number" value="1">
+            <input v-model="form.totalAulas" type="number" value="1">
             <span>aulas</span>
-            <button class="flex text-white bg-red-700 px-6 font-bold py-2 shadow-lg rounded">
+            <button @click="downloadZip()" class="flex text-white bg-red-700 px-6 font-bold py-2 shadow-lg rounded">
               <svg class="text-red-100 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M10 12C9.44769 12 9 12.4477 9 13C9 13.5523 9.44769 14 10 14H14C14.5522 14 15 13.5523 15 13C15 12.4477 14.5522 12 14 12H10Z" fill="currentColor" /><path fill-rule="evenodd" clip-rule="evenodd" d="M4 2C2.34314 2 1 3.34314 1 5V19C1 20.6569 2.34314 22 4 22H20C21.6569 22 23 20.6569 23 19V5C23 3.34314 21.6569 2 20 2H4ZM20 4H4C3.44769 4 3 4.44769 3 5V8H21V5C21 4.44769 20.5522 4 20 4ZM3 19V10H21V19C21 19.5523 20.5522 20 20 20H4C3.44769 20 3 19.5523 3 19Z" fill="currentColor" /></svg>
               <span>Dowload do pacote completo</span>
             </button>
@@ -55,6 +55,9 @@
         </footer>
       </div>
     </main>
+    <div class="flex flex-wrap container mx-auto">
+      <img v-for="img in zip" :src="img.img" class="md:w-1/4 bg-red" alt="">
+    </div>
     <footer>
       <div class="container mx-auto">
         Tecnologia por Sergio Carvalho
@@ -73,12 +76,16 @@ export default {
         titulo: 'Energias',
         cidade: 'Uberlândia',
         imagem: null,
+        totalAulas: 10,
+        aula: 0
       },
       canvas: {
         ctx: null,
         width: 878,
         height: 500
-      }
+      },
+      gerandoZip: false,
+      zip: []
     }
   },
   computed: {
@@ -125,7 +132,6 @@ export default {
   },
   methods:{
     calcCrop(x,y){
-      console.log(`x:${x} y:${y}`);
       let biggestSize = x > y ? 'x' : 'y';
       let sx = 0;
       let sy = 0;
@@ -148,7 +154,6 @@ export default {
       let i = new Image();
       i.onload = function(){
         let axis = cx.calcCrop(i.width, i.height);
-        console.log(axis);
         canvas.ctx.drawImage(i, axis.sx, axis.sy, axis.sWidth, axis.sHeight, 0, 0, 660, canvas.height);
         cx.image = i;
         cx.applyBase();
@@ -166,6 +171,7 @@ export default {
       img.src = 'generator/base.png';
     },
     applyTexts(){
+      // Cidade
       this.canvas.ctx.font = '48px MoolBoran';
       this.canvas.ctx.textAlign="left";
       this.canvas.ctx.fillStyle = '#C52528';
@@ -174,12 +180,23 @@ export default {
       this.canvas.ctx.strokeText(this.form.cidade, 35, 60);
       this.canvas.ctx.fillText(this.form.cidade, 35, 60);
 
+      // Aula
+      if (this.form.aula){
+        this.canvas.ctx.font = '72px MoolBoran';
+        this.canvas.ctx.fillStyle = '#C52528';
+        this.canvas.ctx.strokeStyle = '#FFF';
+        this.canvas.ctx.lineWidth = 5;
+        this.canvas.ctx.strokeText(`Aula ${this.form.aula < 10 ? '0'+this.form.aula : this.form.aula}`, 35, 465);
+        this.canvas.ctx.fillText(`Aula ${this.form.aula < 10 ? '0'+this.form.aula : this.form.aula}`, 35, 465);
+      }
+
+      // TSV
       this.canvas.ctx.font = '48px MoolBoran';
       this.canvas.ctx.textAlign="right";
       this.canvas.ctx.fillStyle = '#C52528';
       this.canvas.ctx.fillText(this.form.tsv, 843, this.initialHeight);
 
-
+      // Titulo
       for (var i = 0; i < this.tituloParsed.length; i++) {
         let height = this.sizeTitulo;
         let y = (this.initialHeight + (height * 5)) + (i * (height * 5));
@@ -187,7 +204,6 @@ export default {
         this.canvas.ctx.fillStyle = '#004280';
         this.canvas.ctx.fillText(this.tituloParsed[i], 843, y);
       }
-
       this.downloadSingle();
     },
     updateImage(e) {
@@ -201,11 +217,49 @@ export default {
       reader.readAsDataURL(e.target.files[0]);
     },
     downloadSingle(){
-      console.log('estou aqui');
       let button = document.querySelector('#downloadSingle');
-      console.log(button);
       button.download = `${this.form.tsv.toLowerCase()}.png`;
-      button.href = document.getElementById('canvas').toDataURL()
+      let img = document.getElementById('canvas').toDataURL();
+      button.href = img
+      this.form.imagem = img;
+    },
+    async downloadZip(){
+      this.gerandoZip = true;
+      this.form.aula++;
+      if (this.form.aula == 1) {
+        let img = document.getElementById('canvas').toDataURL();
+        let obj = {
+          nome: `${this.form.tsv.toLowerCase()}`,
+          img: img
+        }
+        this.zip.push(obj);
+      }
+      if (this.form.aula == this.form.totalAulas) {
+        this.geraImagemArray(true);
+      }else{
+        this.geraImagemArray();
+      }
+    },
+    async geraImagemArray(ultimo){
+      let cx = this;
+      setTimeout(function () {
+        let img = document.getElementById('canvas').toDataURL();
+        let obj = {
+          nome: `${cx.form.tsv.toLowerCase()}-aula${cx.form.aula < 10 ? '0'+cx.form.aula : cx.form.aula}`,
+          img: img
+        }
+        cx.zip.push(obj);
+      }, 500);
+      if (!ultimo) {
+        setTimeout(function () {
+          cx.downloadZip()
+        }, 1000);
+      }else{
+        setTimeout(function () {
+          cx.form.aula = 0;
+          cx.gerandoZip = false;
+        }, 1000);
+      }
     }
   },
   mounted() {
