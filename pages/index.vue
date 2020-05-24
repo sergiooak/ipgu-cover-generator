@@ -7,8 +7,8 @@
     </header>
     <main class="flex-1">
       <div class="container mx-auto">
-        <div class="bg-white rounded-lg p-4 shadow-lg flex flex-row-reverse">
-          <form class="w-2/6 flex flex-col">
+        <div class="bg-white rounded-lg p-4 shadow-lg flex flex-col md:flex-row-reverse">
+          <form class="md:w-2/6 flex flex-col">
             <label class="block">
               <span class="text-gray-700">Número TSV:</span>
               <input class="form-input mt-1 block w-full" v-model="form.tsv">
@@ -30,7 +30,7 @@
               <input type="file" class="dropzone mt-1 block w-full" style="height: 42px; padding: 6px;" @change="updateImage">
             </label>
           </form>
-          <div class="canvasWrapper w-4/6 pr-4 border-r-2 border-gray-300 mr-4">
+          <div class="canvasWrapper md:w-4/6 pt-4 md:pt-0 md:pr-4 border-t-2 md:border-t-0 md:border-r-2 border-gray-300 mt-4 md:mt-0 md:mr-4">
             <canvas class="w-full bg-gray-300" :width="canvas.width" :height="canvas.height" id="canvas" />
           </div>
         </div>
