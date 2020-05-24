@@ -2,7 +2,7 @@
   <div class="wrapper h-screen flex flex-col">
     <header>
       <div class="container mx-auto px-4">
-        <h1 class="text-center text-white py-10 text-3xl leading-none md:text-5xl" style="font-family: MoolBoran, sans-serif;">Gere as thumbnails para cursos do IPGU facilmente</h1>
+        <h1 class="text-center text-white py-10 text-3xl leading-none md:text-5xl fontM">Gere as thumbnails para cursos do IPGU facilmente</h1>
       </div>
     </header>
     <main class="flex-1">
@@ -34,6 +34,25 @@
             <canvas class="w-full bg-gray-300" :width="canvas.width" :height="canvas.height" id="canvas" />
           </div>
         </div>
+        <footer class="mt-4 flex flex-col md:flex-row justify-between px-2 md:px-20">
+          <div class="">
+            <a id="downloadSingle" class="flex justify-center text-white bg-red-700 px-6 font-bold py-4 mb-8 md:mb-0 md:py-2 shadow-lg rounded text-center">
+              <svg class="text-red-100 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M11 5C11 4.44772 11.4477 4 12 4C12.5523 4 13 4.44772 13 5V12.1578L16.2428 8.91501L17.657 10.3292L12.0001 15.9861L6.34326 10.3292L7.75748 8.91501L11 12.1575V5Z" fill="currentColor" /><path d="M4 14H6V18H18V14H20V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V14Z" fill="currentColor" /></svg>
+              <span>
+                Baixar esta imagem
+              </span>
+            </a>
+          </div>
+          <div class="flex flex-col md:flex-row items-center ">
+            <span>Ou baixe o zip com</span>
+            <input type="number" value="1">
+            <span>aulas</span>
+            <button class="flex text-white bg-red-700 px-6 font-bold py-2 shadow-lg rounded">
+              <svg class="text-red-100 mr-2" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M10 12C9.44769 12 9 12.4477 9 13C9 13.5523 9.44769 14 10 14H14C14.5522 14 15 13.5523 15 13C15 12.4477 14.5522 12 14 12H10Z" fill="currentColor" /><path fill-rule="evenodd" clip-rule="evenodd" d="M4 2C2.34314 2 1 3.34314 1 5V19C1 20.6569 2.34314 22 4 22H20C21.6569 22 23 20.6569 23 19V5C23 3.34314 21.6569 2 20 2H4ZM20 4H4C3.44769 4 3 4.44769 3 5V8H21V5C21 4.44769 20.5522 4 20 4ZM3 19V10H21V19C21 19.5523 20.5522 20 20 20H4C3.44769 20 3 19.5523 3 19Z" fill="currentColor" /></svg>
+              <span>Dowload do pacote completo</span>
+            </button>
+          </div>
+        </footer>
       </div>
     </main>
     <footer>
@@ -168,6 +187,8 @@ export default {
         this.canvas.ctx.fillStyle = '#004280';
         this.canvas.ctx.fillText(this.tituloParsed[i], 843, y);
       }
+
+      this.downloadSingle();
     },
     updateImage(e) {
       let cx = this;
@@ -178,6 +199,13 @@ export default {
         cx.reset(event.target.result)
       }
       reader.readAsDataURL(e.target.files[0]);
+    },
+    downloadSingle(){
+      console.log('estou aqui');
+      let button = document.querySelector('#downloadSingle');
+      console.log(button);
+      button.download = `${this.form.tsv.toLowerCase()}.png`;
+      button.href = document.getElementById('canvas').toDataURL()
     }
   },
   mounted() {
@@ -205,6 +233,10 @@ export default {
             url('../assets/fonts/MoolBoran.woff') format('woff');
       font-weight: normal;
       font-style: normal;
+  }
+
+  .fontM{
+    font-family: MoolBoran, sans-serif;
   }
 
   body{
