@@ -11,15 +11,15 @@
           <form class="md:w-2/6 flex flex-col">
             <label class="block">
               <span class="text-gray-700">Número TSV:</span>
-              <input class="form-input mt-1 block w-full" v-model.lazy="form.tsv">
+              <input class="form-input mt-1 block w-full" v-model="form.tsv">
             </label>
             <label class="block">
               <span class="text-gray-700">Título:</span>
-              <textarea class="form-textarea mt-1 block w-full" rows="3" v-model.lazy="form.titulo"></textarea>
+              <textarea class="form-textarea mt-1 block w-full" rows="3" v-model="form.titulo"></textarea>
             </label>
             <label class="block">
               <span class="text-gray-700">Cidade:</span>
-              <input class="form-input mt-1 block w-full" v-model.lazy="form.cidade">
+              <input class="form-input mt-1 block w-full" v-model="form.cidade">
             </label>
             <label class="block relative flex-1 flex flex-col">
               <span class="text-gray-700">Imagem:</span>
@@ -30,8 +30,11 @@
               <input type="file" class="dropzone mt-1 block w-full" style="height: 42px; padding: 6px;" @change="updateImage">
             </label>
           </form>
-          <div class="canvasWrapper md:w-4/6 pt-4 md:pt-0 md:pr-4 border-t-2 md:border-t-0 md:border-r-2 border-gray-300 mt-4 md:mt-0 md:mr-4">
+          <div class="relative canvasWrapper md:w-4/6 pt-4 md:pt-0 md:pr-4 border-t-2 md:border-t-0 md:border-r-2 border-gray-300 mt-4 md:mt-0 md:mr-4">
             <canvas class="w-full bg-gray-300" :width="canvas.width" :height="canvas.height" id="canvas" />
+            <div id="overlay" class="flex items-center justify-center" v-if="gerandoZip || reseting">
+              <i class="gg-spinner"></i>
+            </div>
           </div>
         </div>
         <footer class="mt-4 flex flex-col md:flex-row justify-between px-2 md:px-20">
@@ -70,19 +73,20 @@
 export default {
   data: function (){
     return {
+      reseting: false,
       form: {
         initialHeight: 212,
         tsv: 'TSV1',
         titulo: 'Energias',
         cidade: 'Uberlândia',
-        imagem: null,
         totalAulas: 10,
         aula: 0
       },
       canvas: {
         ctx: null,
         width: 878,
-        height: 500
+        height: 500,
+        image: null,
       },
       gerandoZip: false,
       zip: []
@@ -147,18 +151,21 @@ export default {
       }
       return {sx: sx, sy: sy, sWidth: x, sHeight: y};
     },
-    reset(img) {
-      let cx = this;
-      let canvas = this.canvas;
-      this.canvas.ctx.clearRect(0, 0, this.width, this.height);
-      let i = new Image();
-      i.onload = function(){
-        let axis = cx.calcCrop(i.width, i.height);
-        canvas.ctx.drawImage(i, axis.sx, axis.sy, axis.sWidth, axis.sHeight, 0, 0, 660, canvas.height);
-        cx.image = i;
-        cx.applyBase();
+    reset() {
+      if (!this.reseting) {
+        this.reseting = true;
+        console.log('reset');
+        let cx = this;
+        let canvas = this.canvas;
+        this.canvas.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        let i = new Image();
+        i.onload = function(){
+          let axis = cx.calcCrop(i.width, i.height);
+          canvas.ctx.drawImage(i, axis.sx, axis.sy, axis.sWidth, axis.sHeight, 0, 0, 660, canvas.height);
+          cx.applyBase();
+        }
+        i.src = this.canvas.image ? this.canvas.image : 'generator/temp.png';
       }
-      i.src = img ? img : 'generator/temp.png';
     },
     applyBase(){
       let cx = this;
@@ -212,7 +219,7 @@ export default {
       let reader = new FileReader();
       reader.onload = function(event){
         let img = new Image();
-        cx.reset(event.target.result)
+        cx.canvas.image = event.target.result;
       }
       reader.readAsDataURL(e.target.files[0]);
     },
@@ -221,7 +228,7 @@ export default {
       button.download = `${this.form.tsv.toLowerCase()}.png`;
       let img = document.getElementById('canvas').toDataURL();
       button.href = img
-      this.form.imagem = img;
+      this.reseting = false;
     },
     async downloadZip(){
       this.gerandoZip = true;
@@ -249,16 +256,16 @@ export default {
           img: img
         }
         cx.zip.push(obj);
-      }, 500);
+      }, 300);
       if (!ultimo) {
         setTimeout(function () {
           cx.downloadZip()
-        }, 1000);
+        }, 600);
       }else{
         setTimeout(function () {
           cx.form.aula = 0;
           cx.gerandoZip = false;
-        }, 1000);
+        }, 600);
       }
     }
   },
@@ -274,7 +281,10 @@ export default {
       handler(){
         this.reset();
       },
-    deep: true
+      deep: true
+    },
+    'canvas.image'(){
+      this.reset();
     }
   }
 }
@@ -310,5 +320,52 @@ export default {
     top: 0;
     left: 0;
     cursor: pointer;
+  }
+
+  #overlay{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);
+  }
+
+  .gg-spinner {
+  transform: scale(var(--ggs,1))
+  }
+
+  .gg-spinner,
+  .gg-spinner::after,
+  .gg-spinner::before {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 20px
+  }
+
+  .gg-spinner::after,
+  .gg-spinner::before {
+  content: "";
+  position: absolute;
+  border-radius: 100px
+  }
+
+  .gg-spinner::before {
+  animation: spinner 1s
+  cubic-bezier(.6,0,.4,1) infinite;
+  border: 3px solid transparent;
+  border-top-color: currentColor
+  }
+
+  .gg-spinner::after {
+  border: 3px solid;
+  opacity: .2
+  }
+
+  @keyframes spinner {
+  0% { transform: rotate(0deg) }
+  to { transform: rotate(359deg) }
   }
 </style>
